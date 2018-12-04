@@ -52,19 +52,10 @@ Note: Make sure the credentials details are present in the home/.aws directory.
 1. The app can be run on a webserver or can be loaded form a browser.
 Starting page is /Orders.html
 
-
-
 ## Versioning
 
-We use git(https://git-scm.com/) for versioning. For the versions available, see the [tags on this repository](https://gitlab.corecompete.com/liveair/proto). 
-
 ## Authors
-
-1.Pratap Chandana
-2.Srikanth Thoranam
-3.Sanjay Jain
-4.Shashank Kumar
-5.Sandeep Bagati
+Shashank Kumar
 
 ## Acknowledgements
 
