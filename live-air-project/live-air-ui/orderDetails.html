@@ -1,0 +1,169 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <style>html { font-size: 14px; font-family: Arial, Helvetica, sans-serif; }</style>
+  <title></title>
+  <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.3.913/styles/kendo.common-material.min.css" />
+  <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.3.913/styles/kendo.material.min.css" />
+  <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.3.913/styles/kendo.material.mobile.min.css" />
+  <script src="https://kendo.cdn.telerik.com/2017.3.913/js/jquery.min.js"></script>
+  <script src="https://kendo.cdn.telerik.com/2017.3.913/js/angular.min.js"></script>
+  <script src="https://kendo.cdn.telerik.com/2017.3.913/js/kendo.all.min.js"></script>
+  
+
+</head>
+<body>
+  <div id="example" ng-app="KendoDemos">
+    <div ng-controller="DetailCtrl" style="float: center;padding:20px;">
+      <div  style="width:65%; margin:0 auto;float: center;padding:20px;color:#093CAA;">
+        <img src="flighttracker.jpg" alt="Mountain View" style="width:150px;height:150px;float:left;vertical-align: middle;">
+        <img id="loader" src="Double Ring.gif" alt="Mountain View" style="width:100px;height:100px;float:right;margin-right:4em;margin-top: 2em;vertical-align: middle;">
+        <div  style="float:center;margin:50px 50px ;"><h1 >Live Air : Order Details</h1></div>
+
+      </div>
+      <div style="width:80%; margin:0 auto;">  
+       <div style="width: 100%;  ">
+         <kendo-grid id="detailGridOptions" options="detailGridOptions" />  </kendo-grid>
+       </div><br><br>
+       
+       <div style="width: 100%;">
+        <input  type="submit" id ="backBtn" name="backBtn" ng-click="BackToHome();" value="Back" kendo-button class="k-primary" style="background:#d84f4f;border-color:rgba(249, 225, 225, 0)" />
+      </div>  
+    </div>
+    <span id="notification"></span>
+  </div>
+</div>
+
+<style>
+.contact-info-form {
+  list-style-type: none;
+  margin: 30px 0;
+  padding: 0;
+}
+
+.contact-info-form li {
+  margin: 10px 0;
+}
+
+.contact-info-form label {
+  display: inline-block;
+  width: 100px;
+  text-align: right;
+  font-weight: bold;
+}
+h1  {
+  color: #d84f4f;
+  font-family: Trebuchet MS;
+  vertical-align: middle;
+  margin-left: 4em;
+  font-size: 35px;
+  
+}
+
+</style>
+
+<script>
+
+  angular.module("KendoDemos", [ "kendo.directives" ])
+  .controller("DetailCtrl", function($scope,$http,$location,$window){
+
+    var loadtime;
+    $("#loader").hide(); 
+    var time1;
+    var time2; 
+    var notificationWidget = $("#notification").kendoNotification({
+      autoHideAfter: 10000
+    }).data("kendoNotification");
+
+    
+    $scope.BackToHome = function (){
+      window.location = "Orders.html";
+    }
+
+    init();
+    function init(){
+      var orderNumber = $location.search().order_id;
+      console.log("New Flight Id........."+orderNumber);
+
+      time1= new Date();
+      $("#loader").show();
+
+      $http({
+        method : "GET",
+        url : "https://p2x804pqbh.execute-api.us-east-1.amazonaws.com/api/tenants/111/orders/11123456/events",
+        dataType: "jsonp"
+      }).success(function(result) {   
+        if (result.ERROR != undefined) {
+         time2= new Date();
+         $("#loader").hide();
+         loadtime=time2-time1;
+         notificationWidget.show("RoundTime :" + loadtime + "ms");
+       } else {
+         var detailGridOptions = $("#detailGridOptions").data("kendoGrid");
+         time2= new Date();
+         
+         detailGridOptions.dataSource.data(result);
+
+         $("#loader").hide();
+         loadtime=time2-time1;
+         notificationWidget.show("RoundTime :" + loadtime + " ms");
+
+       }
+       
+     });
+    }
+    
+    $scope.detailGridOptions = {
+      dataSource: {
+        data:[],
+        pageSize: 10
+      },
+      sortable: true,
+      pageable: true, 
+      reorderable:true,        
+      noRecords: true,
+      messages: {
+        noRecords: "There is no data on current page"
+      },      
+      columns: [{
+        field: "EventID",
+        title: "Event ID",
+        width: "120px"
+      },{
+        field: "OrderID",
+        title: "Order ID",
+        width: "120px"
+      },
+      {
+       field: "EventTime",
+       title: "Event Time",
+       width: "120px"
+     },{
+      field: "EventType",
+      title: "Event Type",
+      width: "120px"
+    },{
+      field: "FlightNumber",
+      title: "Flight Number",
+      width: "160px"
+    },{
+     field: "FlightStatus",
+     title: "Flight Status",
+     width: "120px"
+   },{
+     field: "GeoLocation",
+     title: "Geo Location",
+     width: "160px"
+   },{
+     field: "TenantID",
+     title: "Tenant ID",
+     width: "120px"
+   }]
+ };            
+})
+</script>
+
+
+</body>
+</html>

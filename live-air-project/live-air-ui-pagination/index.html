@@ -1,0 +1,361 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <style>html { font-size: 14px; font-family: Arial, Helvetica, sans-serif; }</style>
+  <title></title>
+  <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.3.913/styles/kendo.common-material.min.css" />
+  <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.3.913/styles/kendo.material.min.css" />
+  <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.3.913/styles/kendo.material.mobile.min.css" />
+  <script src="https://kendo.cdn.telerik.com/2017.3.913/js/jquery.min.js"></script>
+  <script src="https://kendo.cdn.telerik.com/2017.3.913/js/angular.min.js"></script>
+  <script src="https://kendo.cdn.telerik.com/2017.3.913/js/kendo.all.min.js"></script>
+
+
+</head>
+<body>
+  <div id="example" ng-app="KendoDemos">
+    <div ng-controller="MyCtrl" >
+      <div  style="width:65%; margin:0 auto;float: center;padding:20px;color:#093CAA;">
+       <img src="flighttracker.jpg" alt="Mountain View" style="width:150px;height:150px;float:left;vertical-align: middle;">
+       <img id="loader" src="Double Ring.gif" alt="Mountain View" style="width:100px;height:100px;float:right;margin-right:4em;margin-top: 2em;vertical-align: middle;">
+       <div  style="float:center;margin:50px 50px ;"><h1 >Live Air : Order Dashboard</h1></div>
+
+     </div>
+     <br><br>
+     <div style="width:80%; margin:0 auto;">
+       <div style="width: 80%; margin: 0; float: left;">
+        <label style="color:#d84f4f"><strong>ORDER ID  &nbsp;: &nbsp;</strong></label>
+        <input style="width: 250px; height: 28px;"  ng-model="orderNumber" name="orderNumber"  id="orderNumber" kendo-masked-text-box maxlength="30" />
+        <input style="margin-left:30px;background:#d84f4f;border-color:rgba(249, 225, 225, 0)" type="submit" id ="searchBtn" name="searchBtn" ng-click="search();" value="Search" kendo-button class="k-primary"/>
+        <input style="margin-left:30px;background:#d84f4f;border-color:rgba(249, 225, 225, 0)" type="submit" id ="addBtn" name="addBtn" ng-click="addOrder();" value="Add" kendo-button class="k-primary" />
+        <input style="margin-left:30px;background:#d84f4f;border-color:rgba(249, 225, 225, 0)" type="submit" id ="delBtn" name="delBtn" ng-click="delOrder();" value="Delete" kendo-button class="k-primary"/>
+        <input style="margin-left:30px;background:#d84f4f;border-color:rgba(249, 225, 225, 0)" type="submit" id ="saveBtn" name="saveBtn" ng-click="saveBtn();" value="Update" kendo-button class="k-primary" />
+
+      </div>
+      <br><br><br>
+      <div style="width: 100%; margin-top: 20px;margin-bottom: 20px; float: left;">
+       <kendo-grid id="mainGridOptions" options="mainGridOptions" />            
+     </div>
+     <div style="width: 100%;">
+      <input style="margin-bottom:30px;background:#d84f4f;border-color:rgba(249, 225, 225, 0)" type="submit" id ="Next" name="Next" ng-click="Next();" value="Get More Items" kendo-button class="k-primary" />
+    </div> 
+  </div>
+  <span id="notification"></span>
+</div>
+</div>
+
+<style>
+
+.contact-info-form {
+  list-style-type: none;
+  margin: 30px 0;
+  padding: 0;
+}
+
+.contact-info-form li {
+  margin: 10px 0;
+}
+
+.contact-info-form label {
+  display: inline-block;
+  width: 100px;
+  text-align: right;
+  font-weight: bold;
+}
+h1  {
+  color: #d84f4f;
+  font-family: Trebuchet MS;
+  vertical-align: middle;
+  margin-left: 4em;
+  font-size: 35px;
+
+}
+
+</style>
+
+<script>
+
+  angular.module("KendoDemos", [ "kendo.directives" ])
+  .controller("MyCtrl", function($scope,$http,$window){
+
+   $("#loader").hide();
+   var loadtime; 
+   var time1= new Date();
+   $("#loader").show();
+   var time2; 
+   var notificationWidget = $("#notification").kendoNotification({
+    autoHideAfter: 15000
+  }).data("kendoNotification");
+
+
+   var orderNumber = "";
+   var first = "";
+   var last="";
+
+   $scope.search = function (){
+     var data;
+     data={
+      "MAWB":$scope.orderNumber,
+      "ExclusiveStartKey":"",
+    } ;
+    orderNumber = $scope.orderNumber;	
+    first="";
+
+    time1= new Date();
+    $("#loader").show();
+    
+    $http({
+      method : "GET",
+      url:"https://xr7l6t1gv1.execute-api.us-east-1.amazonaws.com/GetLiverOrders/?MAWB="+orderNumber+"&ExclusiveStartKey="+first,
+      dataType: "jsonp"
+    }).success(function(result) {   
+      if (result.ERROR != undefined) {
+        time2= new Date();
+        $("#loader").hide();
+        loadtime=time2-time1;
+        notificationWidget.show("RoundTime :" + loadtime + " ms");
+
+      } else {
+        time2= new Date();
+        var mainGridOptions = $("#mainGridOptions").data("kendoGrid");
+        mainGridOptions.dataSource.data(result);
+        $("#loader").hide();
+        loadtime=time2-time1;
+        notificationWidget.show("RoundTime :" + loadtime + " ms");
+
+      }
+    });
+
+  }
+
+  $scope.addOrder = function (){
+    window.location = "addMAWB1.html";
+  }
+
+  $scope.saveBtn = function (){
+
+    var data = $("#mainGridOptions").data("kendoGrid").dataSource.data();
+    
+    var grid = $("#mainGridOptions").data("kendoGrid");
+    var selectedItem = grid.dataItem(grid.select());
+
+    if(selectedItem==null){
+      alert("Please select a row!!");
+      return;
+    }
+
+    var data;
+    data={
+      "MAWB":selectedItem['MAWB'],
+      "FlightId":selectedItem['FlightId'],
+      "DESTINATION":selectedItem['DESTINATION'],
+      "Pieces":selectedItem['TOT_PIECES'],
+    } ;
+
+    time1= new Date();
+    $("#loader").show();
+
+    $http({
+      method : "POST",
+      url : "https://hg74egusp5.execute-api.us-east-1.amazonaws.com/prod/addMAWBtoDB",
+      contentType: "application/json",
+      data : data
+    }).success(function(result) {   
+
+
+     time2= new Date();
+     $("#loader").hide();
+     loadtime=time2-time1;
+     notificationWidget.show("RoundTime :" + loadtime + " ms");
+     $("#mainGridOptions").data("kendoGrid").dataSource.read();
+
+
+   }).error(function(data, status) {   
+     time2= new Date();
+     $("#loader").hide();
+     loadtime=time2-time1;
+     notificationWidget.show("RoundTime :" + loadtime + " ms");
+
+     console.log("Some error while saving data:"+ status);
+   });
+
+
+
+
+ }
+
+ $scope.delOrder = function (){
+  var grid = $("#mainGridOptions").data("kendoGrid");
+  var selectedItem = grid.dataItem(grid.select());
+
+  if(selectedItem==null){
+    alert("Please select a row!!");
+    return;
+  }
+
+  var mawb=selectedItem['MAWB'];
+
+  var data;
+
+  data={
+    "MAWB":mawb
+
+  } ;
+
+  time1= new Date();
+  $("#loader").show();
+
+  $http({
+    method : "DELETE",
+    url : "https://dyq51tnmig.execute-api.us-east-1.amazonaws.com/prod/deleteMAWBfromDB",
+    contentType: "application/json",
+    data : data
+  }).success(function(result) {   
+
+
+    console.log("Done with the job:"+result);
+
+    time2= new Date();
+    $("#loader").hide();
+    loadtime=time2-time1;
+    notificationWidget.show("RoundTime :" + loadtime + " ms");
+    $("#mainGridOptions").data("kendoGrid").dataSource.read();
+
+  }).error(function(data, status) {   
+   time2= new Date();
+   $("#loader").hide();
+   loadtime=time2-time1;
+   notificationWidget.show("RoundTime :" + loadtime + " ms");
+   console.log("Some error while saving data:"+ status);
+ });
+
+
+}
+
+$scope.Next = function (){
+
+  orderNumber = ""; 
+
+
+  var results = $("#mainGridOptions").data("kendoGrid").dataSource.data();
+  first=results[results.length-1]['MAWB'];
+
+
+  time1= new Date();
+  $http({
+    method : "GET",
+    url:"https://xr7l6t1gv1.execute-api.us-east-1.amazonaws.com/GetLiverOrders/?MAWB="+orderNumber+"&ExclusiveStartKey="+first,
+    dataType: "jsonp"
+  }).success(function(result) {   
+    if (result.ERROR != undefined) {
+      time2= new Date();
+      $("#loader").hide();
+      loadtime=time2-time1;
+      notificationWidget.show("RoundTime :" + loadtime + " ms");
+
+    } else {
+      time2= new Date();
+      $("#loader").hide();
+      loadtime=time2-time1;
+      notificationWidget.show("RoundTime :" + loadtime + " ms");
+
+      for(var i=0;i<result.length;i++){
+        results.push(result[i]);
+      }
+
+      var mainGridOptions = $("#mainGridOptions").data("kendoGrid");
+      mainGridOptions.dataSource.data(results);
+
+
+    }
+  });
+}
+
+
+$scope.mainGridOptions = {
+  dataSource: {
+    transport: {
+      read:"https://xr7l6t1gv1.execute-api.us-east-1.amazonaws.com/GetLiverOrders/?MAWB="+orderNumber+"&ExclusiveStartKey="+first,
+      dataType: "jsonp",
+      cache: "inmemory",
+
+    },
+    schema: {
+      model: {
+        id: "id",
+        fields: {
+          MAWB: { editable: false},
+          FlightId: { editable: true} ,   
+          DESTINATION:{ editable: true} ,
+          LATEST_ETA: { editable: true},
+          LATEST_STATUS: { editable: true },
+          TOT_PIECES: { editable: true },
+          TOT_WEIGHT: { editable: true }
+        }
+      }
+    },
+    pageSize: 10
+  },
+
+  sortable: true,
+  dataBound: function(e) {
+
+    time2= new Date();
+    $("#loader").hide();
+    if(!loadtime){
+     loadtime=time2-time1;
+     notificationWidget.show("GridLoadTime :" + loadtime + " ms");
+   }
+
+ },
+ editable:true,
+ pageable: true,
+ selectable:true,
+ noRecords: true,
+ messages: {
+  noRecords: "There is no data on current page"
+},  
+reorderable:true,
+columns: [{
+  field: "MAWB",
+  title: "ORDER ID",
+  template:"<a href='detail.html\\#/order_detail/?order_id=${MAWB}'>${MAWB}</a>",
+  width: "120px"
+},{
+  field: "FlightId",
+  title: "FLIGHT ID",
+  width: "120px"
+},
+{
+ field: "DESTINATION",
+ title: "FINAL DESTINATION",
+ width: "140px"
+},{
+  field: "LATEST_ETA",
+  title: "LATEST ETA",
+  width: "120px"
+},{
+  field: "LATEST_STATUS",
+  title: "LATEST STATUS",
+  width: "120px"
+},{
+  field: "TOT_PIECES",
+  title: "ITEM COUNT",
+  width: "120px"
+},{
+ field: "TOT_WEIGHT",
+ title: "TOTAL WEIGHT",
+ width: "120px"
+}
+]
+
+
+}; 
+
+})
+</script>
+
+
+</body>
+</html>

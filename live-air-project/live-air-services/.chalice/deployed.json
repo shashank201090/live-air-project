@@ -1,0 +1,17 @@
+{
+  "dev": {
+    "api_handler_name": "live-air-dev",
+    "api_handler_arn": "arn:aws:lambda:us-east-1:116622351718:function:live-air-dev",
+    "lambda_functions": {
+      "live-air-dev-OrderInfo_Trigger": {
+        "arn": "arn:aws:lambda:us-east-1:116622351718:function:live-air-dev-OrderInfo_Trigger",
+        "type": "pure_lambda"
+      }
+    },
+    "backend": "api",
+    "chalice_version": "1.0.3",
+    "rest_api_id": "p2x804pqbh",
+    "api_gateway_stage": "api",
+    "region": "us-east-1"
+  }
+}

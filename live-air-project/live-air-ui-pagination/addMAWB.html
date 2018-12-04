@@ -1,0 +1,165 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+    <style>html { font-size: 14px; font-family: Arial, Helvetica, sans-serif; }</style>
+    <title>ADD MAWB</title>
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.3.913/styles/kendo.common-material.min.css" />
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.3.913/styles/kendo.material.min.css" />
+    <link rel="stylesheet" href="https://kendo.cdn.telerik.com/2017.3.913/styles/kendo.material.mobile.min.css" />
+    <script src="https://kendo.cdn.telerik.com/2017.3.913/js/jquery.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2017.3.913/js/angular.min.js"></script>
+    <script src="https://kendo.cdn.telerik.com/2017.3.913/js/kendo.all.min.js"></script>
+
+
+</head>
+<body>
+    <div id="example" ng-app="KendoDemos">
+        <div ng-controller="MyController" style="float: center;padding:20px;">
+            <div  style="width:60%; margin:0 auto;float: center;padding:1px;color:#093CAA;">
+                <img src="flighttracker.jpg" alt="Mountain View" style="width:150px;height:150px;float:left;vertical-align: middle;">
+                <img id="loader" src="Double Ring.gif" alt="Mountain View" style="width:100px;height:100px;float:right;margin-right:8em;margin-top: 2em;vertical-align: middle;">
+                <div  style="float:center;margin:50px 50px ;"><h1 >Live Air : Enter Details</h1></div>
+
+            </div>
+            <div id="first">
+                <ul class="fieldlist">
+                    <li>
+                        <label for="simple-input" style="color: #d84f4f;">ORDER ID</label>
+                        <input id="simple-input1" type="text" class="k-textbox" style="width: 80%;" ng-model="MAWB"/>
+                    </li>
+                    <li>
+                        <label for="simple-textarea" style="color: #d84f4f;">Flight ID</label>
+                        <input id="simple-input2" type="text" class="k-textbox" style="width: 80%;" ng-model="flightID" />
+                    </li>
+                    <li>
+                        <label for="icon-left" style="color: #d84f4f;">Destination</label>
+                        <input id="simple-input3" type="text" class="k-textbox" style="width: 80%;" ng-model="destination"/>
+                    </li>
+                    <li>
+                        <label for="icon-left" style="color: #d84f4f;">Item Count</label>
+                        <input id="simple-input4" type="text" class="k-textbox" style="width: 80%;" ng-model="pieces"/>
+                    </li>
+                    <li>
+                        <button kendo-button class="k-primary" ng-click="addMAWB();" style="background:#d84f4f;border-color:rgba(249, 225, 225, 0)">ADD MAWB</button>
+                        <button kendo-button class="k-primary" ng-click="BackToHome();" style="background:#d84f4f;border-color:rgba(249, 225, 225, 0)">Back</button>
+
+                    </li>
+                    
+                </ul>
+            </div>
+            <span id="notification"></span>
+        </div>
+    </div>
+
+    <style>
+
+    div#first{
+        width:300px;
+        height:auto;
+        margin:30px auto 40px;
+        padding:50px;
+        border:1px solid #C2D6FF;
+        border-radius:40px 0 40px 0;
+    }
+    .contact-info-form {
+        list-style-type: none;
+        margin: 30px 0;
+        padding: 0;
+    }
+
+    .contact-info-form li {
+        margin: 10px 0;
+    }
+
+    .contact-info-form label {
+        display: inline-block;
+        width: 100px;
+        text-align: right;
+        font-weight: bold;
+    }
+    .fieldlist {
+        margin: 0 0 -2em;
+        padding: 0;
+    }
+
+    .fieldlist li {
+        list-style: none;
+        padding-bottom: 2em;
+    }
+
+    .fieldlist label {
+        display: block;
+        padding-bottom: 1em;
+        font-weight: bold;
+        text-transform: uppercase;
+        font-size: 12px;
+        color: #444;
+    }
+    h1  {
+        color: #d84f4f;
+        font-family: Trebuchet MS;
+        vertical-align: middle;
+        margin-left: 4em;
+        font-size: 35px;
+
+    }
+</style>
+
+<script>
+
+    angular.module("KendoDemos", [ "kendo.directives" ])
+    .controller("MyController",function($scope,$http,$window){
+       
+        var loadtime; 
+        $("#loader").hide();
+        var time1;
+        var time2; 
+        var notificationWidget = $("#notification").kendoNotification({
+          autoHideAfter: 10000
+      }).data("kendoNotification");
+
+        $scope.BackToHome = function (){
+            window.location = "index.html";
+        }
+
+        $scope.addMAWB = function (){
+            
+            var data;
+            data={
+                "MAWB":$scope.MAWB,
+                "FlightId":$scope.flightID,
+                "DESTINATION":$scope.destination,
+                "Pieces":$scope.pieces
+            } ;
+            time1= new Date();  
+            $("#loader").show();
+
+            $http({
+                method : "POST",
+                url : "https://hg74egusp5.execute-api.us-east-1.amazonaws.com/prod/addMAWBtoDB",
+                contentType: "application/json",
+                data : data
+            }).success(function(result) {
+                $('#example').find('input:text').val('');   
+                time2= new Date();
+                $("#loader").hide();
+                loadtime=time2-time1;
+                notificationWidget.show("RoundTime :" + loadtime + " ms");
+                
+
+
+            }).error(function(data, status) {   
+                time2= new Date();
+                $("#loader").hide();
+                loadtime=time2-time1;
+                notificationWidget.show("RoundTime :" + loadtime + " ms");
+            });
+
+        }           
+    })
+</script>
+
+
+</body>
+</html>
